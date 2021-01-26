@@ -1,0 +1,174 @@
+CREATE DATABASE IF NOT EXISTS db_banco;
+USE db_banco;
+
+/* Load conta */
+DROP TABLE IF EXISTS tb_conta;
+CREATE TABLE IF NOT EXISTS tb_conta(
+	id_conta INT,
+    id_cidade INT,
+    frequencia VARCHAR(20),
+    `date` DATE
+);
+ 
+LOAD DATA  
+INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/account.asc'
+INTO TABLE tb_conta
+FIELDS TERMINATED BY ';'
+ENCLOSED BY '"'
+LINES TERMINATED BY '\r\n'
+IGNORE 1 LINES
+(id_conta, id_cidade, frequencia, @c4)
+SET `date` = STR_TO_DATE(@c4, '%y%m%d');
+
+/* Load Cliente */
+
+DROP TABLE IF EXISTS tb_cliente;
+CREATE TABLE IF NOT EXISTS tb_cliente(
+	id_cliente INT,
+	sexo VARCHAR(10),
+	dt_nascimento DATE,
+	id_cidade INT
+);
+
+LOAD DATA   
+INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/client.asc'
+INTO TABLE tb_cliente
+FIELDS TERMINATED BY ';'
+ENCLOSED BY '"'
+LINES TERMINATED BY '\r\n'
+IGNORE 1 LINES
+(id_cliente, @c2, id_cidade)
+SET sexo = if(SUBSTR(@c2, 3, 2) > 50, 'feminino', 'masculino'),
+dt_nascimento = if(SUBSTR(@c2, 3, 2) > 50, 
+	CONCAT_WS('-', CONCAT('19', SUBSTR(@c2, 1, 2)), SUBSTR(@c2, 3, 2) - 50, SUBSTR(@c2, 5, 2)),
+	STR_TO_DATE(CONCAT('19', @c2), '%Y%m%d'));
+
+/* Load Disponivel */
+DROP TABLE IF EXISTS tb_disponivel;
+CREATE TABLE IF NOT EXISTS tb_disponivel(
+	disp_id INT,
+	id_cliente INT,
+	id_conta INT,
+	tipo VARCHAR(20)
+);
+
+LOAD DATA 
+INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/disp.asc'
+INTO TABLE tb_disponivel
+FIELDS TERMINATED BY ';'
+ENCLOSED BY '"'
+LINES TERMINATED BY '\r\n'
+IGNORE 1 LINES;
+
+/* Load Ordem */
+DROP TABLE IF EXISTS tb_ordem;
+CREATE TABLE IF NOT EXISTS tb_ordem(
+	id_ordem INT,
+	id_conta INT,
+	banco_para VARCHAR(5),
+	conta_para INT,
+	montante DECIMAL(20, 2),
+	k_simbolo VARCHAR(20)
+);
+
+LOAD DATA 
+INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/order.asc'
+INTO TABLE tb_ordem
+FIELDS TERMINATED BY ';'
+ENCLOSED BY '"'
+LINES TERMINATED BY '\r\n'
+IGNORE 1 LINES;
+
+/* Load Transação*/
+DROP TABLE IF EXISTS tb_transacao;
+CREATE TABLE IF NOT EXISTS tb_transacao(
+	id_transacao INT,
+	id_conta INT,
+	`date` DATE,
+	tipo VARCHAR(20),
+	operacao VARCHAR(20),
+	montante INT,
+	balanco INT,
+	k_simbolo VARCHAR(20),
+	banco VARCHAR(20),
+	conta VARCHAR(12)
+);
+LOAD DATA 
+INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/trans.asc'
+INTO TABLE tb_transacao
+FIELDS TERMINATED BY ';'
+ENCLOSED BY '"'
+LINES TERMINATED BY '\r\n'
+IGNORE 1 LINES
+(id_transacao, id_conta, @c3, tipo, operacao, montante, balanco, k_simbolo, banco, conta)
+SET `date` = STR_TO_DATE(@c3, '%y%m%d');
+
+/* Load Empréstimo */
+DROP TABLE IF EXISTS tb_emprestimo;
+CREATE TABLE IF NOT EXISTS tb_emprestimo(
+	id_emprestimo INT,
+	id_conta INT,
+	`date` DATE,
+	montante INT,
+	duracao INT,
+	pagamentos DECIMAL(20, 2),
+	status VARCHAR(10)
+);
+
+LOAD DATA 
+INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/loan.asc'
+INTO TABLE tb_emprestimo
+FIELDS TERMINATED BY ';'
+ENCLOSED BY '"'
+LINES TERMINATED BY '\r\n'
+IGNORE 1 LINES;
+
+/* Load Cartão de Credito */
+DROP TABLE IF EXISTS tb_cartao;
+CREATE TABLE IF NOT EXISTS tb_cartao(
+	id_cartao INT,
+	disp_id INT,
+	tipo VARCHAR(20),
+	dt_emissao DATE
+);
+
+LOAD DATA 
+INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/card.asc'
+INTO TABLE tb_cartao
+FIELDS TERMINATED BY ';'
+ENCLOSED BY '"'
+LINES TERMINATED BY '\r\n'
+IGNORE 1 LINES
+(id_cartao, disp_id, tipo, @c4)
+SET dt_emissao = STR_TO_DATE(@c4, '%y%m%d %H:%i:%s');
+
+/* Load Distrito */
+
+USE db_banco; 
+DROP TABLE IF EXISTS tb_distrito;
+CREATE TABLE IF NOT EXISTS tb_distrito(
+	id_cidade INT,
+	A2 VARCHAR(20),
+	A3 VARCHAR(20),
+	A4 INT,
+	A5 INT,
+	A6 INT,
+	A7 INT,
+	A8 INT,
+	A9 INT,
+	A10 DECIMAL(10, 1),
+	A11 INT,
+	A12 DECIMAL(5, 2),
+	A13 DECIMAL(5, 2),
+	A14 INT,
+	A15 INT,
+	A16 INT
+);
+
+LOAD DATA 
+INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/district.asc'
+INTO TABLE tb_distrito
+FIELDS TERMINATED BY ';'
+ENCLOSED BY '"'
+LINES TERMINATED BY '\r\n'
+IGNORE 1 LINES;
